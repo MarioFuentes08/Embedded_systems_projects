@@ -52,6 +52,11 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
+/* Bootloader function prototypes*/
+void bootloader_uart_read_data(void);
+void bootloader_jump_to_user_app(void);
+
+
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

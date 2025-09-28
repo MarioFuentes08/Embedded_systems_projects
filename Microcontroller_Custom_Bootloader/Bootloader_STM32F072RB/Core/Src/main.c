@@ -18,6 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f0xx_hal.h"
+#include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -35,6 +39,9 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+#define BL_DEBUG_MSG_EN
+
+
 
 /* USER CODE END PM */
 
@@ -43,6 +50,9 @@ CRC_HandleTypeDef hcrc;
 
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+
+#define D_UART &huart3
+#define C_UART &huart2
 
 /* USER CODE BEGIN PV */
 
@@ -54,6 +64,7 @@ static void MX_GPIO_Init(void);
 static void MX_CRC_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void printmsg(char *format,...);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -94,19 +105,49 @@ int main(void)
   MX_CRC_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
+  if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET)
   {
-    /* USER CODE END WHILE */
+	  printmsg("BL_DEBUG_MSG: Button is pressed .. going to BL mode \n\r");
 
-    /* USER CODE BEGIN 3 */
+	  bootloader_uart_read_data();
   }
-  /* USER CODE END 3 */
+  else
+  {
+	  printmsg("BL_DEBUG_MSG: Button is not pressed .. executing user app \n");
+	  bootloader_jump_to_user_app();
+  }
+
+}
+
+
+void bootloader_uart_read_data(void)
+{
+
+
+}
+
+void bootloader_jump_to_user_app(void)
+{
+
+}
+
+
+/* prints formatted string to console over UART */
+void printmsg(char *format,...)
+{
+#ifdef BL_DEBUG_MSG_EN
+	char str[80];
+
+	/* Extract the arument list using VA apis*/
+	va_list args;
+	va_start(args, format);
+	vsprintf(str, format, args);
+	HAL_UART_Transmit(D_UART, (uint8_t *)str, strlen(str), HAL_MAX_DELAY);
+	va_end(args);
+#endif
+
 }
 
 /**
